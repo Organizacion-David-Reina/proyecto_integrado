@@ -1,6 +1,5 @@
 package com.proyectointegrado.reina_cabrera_david.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,11 +29,6 @@ public class UserEntity {
 	private String name;
 	
 	private String lastname;
-	
-	private String password;
-	
-	@Column(name = "corporate_mail")
-	private String corporateMail;
 
 	@ManyToOne
 	@JoinColumn(name = "rol_id")

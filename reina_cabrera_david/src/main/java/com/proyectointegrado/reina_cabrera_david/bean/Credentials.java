@@ -5,23 +5,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-@ToString
-public class User {
-	
-	private int id;
-	
-	private String name;
-	
-	private String lastname;
+public class Credentials {
+
+	private String nif;
 	
 	private String corporateMail;
 	
-	private Role role;
+	private String password;
 }

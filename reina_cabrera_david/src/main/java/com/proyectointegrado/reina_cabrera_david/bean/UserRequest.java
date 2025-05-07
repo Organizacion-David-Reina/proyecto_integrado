@@ -13,15 +13,9 @@ import lombok.ToString;
 @Setter
 @Builder
 @ToString
-public class User {
+public class UserRequest {
+
+	private User user;
 	
-	private int id;
-	
-	private String name;
-	
-	private String lastname;
-	
-	private String corporateMail;
-	
-	private Role role;
+	private Credentials credentials;
 }
