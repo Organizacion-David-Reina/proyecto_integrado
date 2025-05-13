@@ -1,0 +1,35 @@
+package com.proyectointegrado.reina_cabrera_david.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "students")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
+public class StudentEntity {
+	
+	@Id
+	private int id;
+	
+	private String name; 
+	
+	private String lastname;
+	
+	private String nif;
+	
+	@ManyToOne
+	@JoinColumn(name = "bond_id")
+	private BonusEntity bonus;
+}

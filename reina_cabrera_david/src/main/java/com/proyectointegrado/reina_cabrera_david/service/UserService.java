@@ -17,7 +17,6 @@ import com.proyectointegrado.reina_cabrera_david.entity.RoleEntity;
 import com.proyectointegrado.reina_cabrera_david.entity.UserEntity;
 import com.proyectointegrado.reina_cabrera_david.exceptions.InternalServerException;
 import com.proyectointegrado.reina_cabrera_david.repository.CredentialsRepository;
-import com.proyectointegrado.reina_cabrera_david.repository.RoleRepository;
 import com.proyectointegrado.reina_cabrera_david.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -31,13 +30,10 @@ public class UserService {
 	private UserRepository userRepository;
 	
 	private CredentialsRepository credentialsRepository;
-	
-	private RoleRepository roleRepository;
 
-	protected UserService(UserRepository repository, CredentialsRepository credentialsRepository, RoleRepository roleRepository) {
+	protected UserService(UserRepository repository, CredentialsRepository credentialsRepository) {
 		this.userRepository = repository;
-		this.credentialsRepository = credentialsRepository; 
-		this.roleRepository = roleRepository;
+		this.credentialsRepository = credentialsRepository;
 	}
 
 	public User login(String corporateMail, String password) {
@@ -106,10 +102,10 @@ public class UserService {
 			userRepository.save(userEntity);
 			credentialsRepository.updateCorporateMail(user.getId(), user.getCorporateMail());
 		} catch (DataIntegrityViolationException e) {
-			log.error("singUp - error - {}", e.getMessage());
+			log.error("updateUser - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.MAIL_ALREADY_REGISTERED, e);
 		} catch (Exception e) {
-			log.error("singUp - error - {}", e.getMessage());
+			log.error("updateUser - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
 		}
 	}
