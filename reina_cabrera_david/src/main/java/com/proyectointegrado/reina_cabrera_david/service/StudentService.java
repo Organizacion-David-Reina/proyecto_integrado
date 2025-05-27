@@ -1,6 +1,7 @@
 package com.proyectointegrado.reina_cabrera_david.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -75,6 +76,33 @@ public class StudentService {
 		} catch (Exception e) {
 			log.error("updateStudent - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
+		}
+	}
+
+	public List<Student> getStudentsByClassId(int classId) {
+		List<Student> students = studentsRepository
+				.findStudentsByClassId(classId).stream().map(s -> Student.builder().id(s.getId()).name(s.getName())
+						.lastname(s.getLastname()).nif(s.getNif()).bonus(Bonus.builder().id(s.getBonus().getId())
+								.bondType(s.getBonus().getBondType()).price(s.getBonus().getPrice()).build())
+						.build())
+				.collect(Collectors.toList());
+		return students;
+	}
+	
+	public void deleteStudent(int studentId) {
+		log.info("deleteStudent - studentId: {} ", studentId);
+		try {
+			Optional<StudentEntity> optionalStudent = studentsRepository.findById(studentId);
+			
+			if (optionalStudent.isPresent()) {
+				StudentEntity studentEntity = optionalStudent.get();
+				studentsRepository.delete(studentEntity);
+			} else {
+				throw new InternalServerException(ErrorConstants.STUDENT_NOT_EXISTS);
+			}
+		} catch (Exception e) {
+			log.error("deleteStudent - error - {}", e.getMessage());
+			throw new InternalServerException(e.getMessage(), e);
 		}
 	}
 

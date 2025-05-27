@@ -109,6 +109,23 @@ public class UserService {
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
 		}
 	}
+	
+	public void deleteUser(int userId) {
+		log.info("deleteUser - userId: {} ", userId);
+		try {
+			Optional<UserEntity> optionalUser = userRepository.findById(userId);
+			
+			if (optionalUser.isPresent()) {
+				UserEntity userEntity = optionalUser.get();
+				userRepository.delete(userEntity);
+			} else {
+				throw new InternalServerException(ErrorConstants.USER_NOT_EXIST);
+			}
+		} catch (Exception e) {
+			log.error("deleteUser - error - {}", e.getMessage());
+			throw new InternalServerException(e.getMessage(), e);
+		}
+	}
 
 	private UserEntity mapToUserEntity(UserRequest request, RoleEntity roleEntity) {
 		return UserEntity.builder().name(request.getUser().getName())

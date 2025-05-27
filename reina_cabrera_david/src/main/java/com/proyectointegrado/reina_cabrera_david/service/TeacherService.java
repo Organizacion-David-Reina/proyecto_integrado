@@ -1,6 +1,7 @@
 package com.proyectointegrado.reina_cabrera_david.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class TeacherService {
-	
+
 	private TeachersRepository teachersRepository;
 
 	protected TeacherService(TeachersRepository teachersRepository) {
@@ -49,10 +50,8 @@ public class TeacherService {
 	}
 
 	public List<Teacher> getAllTeachers() {
-		List<Teacher> teachers = teachersRepository
-				.findAll().stream().map(t -> Teacher.builder().id(t.getId()).name(t.getName()).lastname(t.getLastname())
-						.nif(t.getNif()).mail(t.getMail())
-						.build())
+		List<Teacher> teachers = teachersRepository.findAll().stream().map(t -> Teacher.builder().id(t.getId())
+				.name(t.getName()).lastname(t.getLastname()).nif(t.getNif()).mail(t.getMail()).build())
 				.collect(Collectors.toList());
 		return teachers;
 	}
@@ -73,10 +72,27 @@ public class TeacherService {
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
 		}
 	}
+	
+	public void deleteTeacher(int teacherId) {
+		log.info("deleteTeacher - teacherId: {} ", teacherId);
+		try {
+			Optional<TeacherEntity> optionalTeacher = teachersRepository.findById(teacherId);
+			
+			if (optionalTeacher.isPresent()) {
+				TeacherEntity teachertEntity = optionalTeacher.get();
+				teachersRepository.delete(teachertEntity);
+			} else {
+				throw new InternalServerException(ErrorConstants.TEACHER_NOT_EXISTS);
+			}
+		} catch (Exception e) {
+			log.error("deleteTeacher - error - {}", e.getMessage());
+			throw new InternalServerException(e.getMessage(), e);
+		}
+	}
 
 	private TeacherEntity mapToTeacherEntity(Teacher request) {
-		return TeacherEntity.builder().id(request.getId()).name(request.getName()).lastname(request.getLastname()).nif(request.getNif())
-				.mail(request.getMail()).build();
+		return TeacherEntity.builder().id(request.getId()).name(request.getName()).lastname(request.getLastname())
+				.nif(request.getNif()).mail(request.getMail()).build();
 	}
 
 }
