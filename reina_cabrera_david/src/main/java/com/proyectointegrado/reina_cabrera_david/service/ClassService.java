@@ -197,7 +197,7 @@ public class ClassService {
 				ClassEntity classEntity = optionalClass.get();
 				classRepository.delete(classEntity);
 			} else {
-				throw new InternalServerException(ErrorConstants.CLASS_NOT_EXIST);
+				throw new InternalServerException(ErrorConstants.CLASS_NOT_EXISTS);
 			}
 		} catch (Exception e) {
 			log.error("deleteClass - error - {}", e.getMessage());

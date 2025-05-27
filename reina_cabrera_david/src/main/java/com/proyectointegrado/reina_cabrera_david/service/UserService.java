@@ -119,7 +119,7 @@ public class UserService {
 				UserEntity userEntity = optionalUser.get();
 				userRepository.delete(userEntity);
 			} else {
-				throw new InternalServerException(ErrorConstants.USER_NOT_EXIST);
+				throw new InternalServerException(ErrorConstants.USER_NOT_EXISTS);
 			}
 		} catch (Exception e) {
 			log.error("deleteUser - error - {}", e.getMessage());
