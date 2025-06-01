@@ -18,9 +18,13 @@ public class ErrorConstants {
 
 	public static String CLASS_NOT_EXISTS = "La clase no existe";
 	
+	public static String CLASS_AND_STUDENT_NOT_EXIST = "La clase o el alumno no existe";
+	
 	public static String USER_NOT_EXISTS = "El usuario no existe";
 	
 	public static String TEACHER_NOT_EXISTS = "El profesor no existe";
 
 	public static String STUDENT_ALREADY_RESERVED = "El alumno ya tiene una reserva";
+	
+	public static String CLASS_IS_FULL = "La clase ya está completa.";
 }

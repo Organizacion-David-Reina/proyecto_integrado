@@ -168,7 +168,13 @@ public class ClassService {
 			if (optionalStudent.isPresent()) {
 				StudentEntity studentEntity = optionalStudent.get();
 				ClassEntity classEntity = classRepository.findById(request.getClassId()).get();
-
+				int roomCapacity = classEntity.getRoom().getCapacity();
+				int reservationCount = reservationRepository.countByClassEntityId(request.getClassId());
+				
+				if (reservationCount == roomCapacity) {
+					throw new InternalServerException(ErrorConstants.CLASS_IS_FULL);
+				}
+				
 				ReservationEntity reservationEntity = ReservationEntity.builder().classEntity(classEntity)
 						.studentEntity(studentEntity).build();
 				boolean alreadyReserved = reservationRepository
@@ -188,6 +194,7 @@ public class ClassService {
 		}
 	}
 	
+	@Transactional
 	public void deleteClass(int classId) {
 		log.info("deleteClass - classId: {} ", classId);
 		try {
@@ -195,9 +202,28 @@ public class ClassService {
 			
 			if (optionalClass.isPresent()) {
 				ClassEntity classEntity = optionalClass.get();
+				reservationRepository.deleteByClassEntityId(classEntity.getId());
 				classRepository.delete(classEntity);
 			} else {
 				throw new InternalServerException(ErrorConstants.CLASS_NOT_EXISTS);
+			}
+		} catch (Exception e) {
+			log.error("deleteClass - error - {}", e.getMessage());
+			throw new InternalServerException(e.getMessage(), e);
+		}
+	}
+	
+	@Transactional
+	public void deleteReservation(int studentId, int classId) {
+		log.info("deleteClass - classId: {} ", classId);
+		try {
+			Optional<ClassEntity> optionalClass = classRepository.findById(classId);
+			Optional<StudentEntity> optionalStudent = studentsRepository.findById(studentId);
+			
+			if (optionalClass.isPresent() && optionalStudent.isPresent()) {
+				reservationRepository.deleteByClassEntityIdAndStudentEntityId(classId, studentId);
+			} else {
+				throw new InternalServerException(ErrorConstants.CLASS_AND_STUDENT_NOT_EXIST);
 			}
 		} catch (Exception e) {
 			log.error("deleteClass - error - {}", e.getMessage());
@@ -218,8 +244,8 @@ public class ClassService {
 		return Style.builder().id(c.getId()).style(c.getStyle()).build();
 	}
 
-	private ClassEntity MapToClassEntity(DanceClass request) {
-		return ClassEntity.builder().id(request.getId() != null ? request.getId() : null)
+	private ClassEntity MapToClassEntity(DanceClass request) {		
+		return ClassEntity.builder().id(request.getId() != -1 ? request.getId() : null)
 				.style(StyleEntity.builder().id(request.getStyle().getId()).style(request.getStyle().getStyle())
 						.build())
 				.teacher(TeacherEntity.builder().id(request.getTeacher().getId()).name(request.getTeacher().getName())

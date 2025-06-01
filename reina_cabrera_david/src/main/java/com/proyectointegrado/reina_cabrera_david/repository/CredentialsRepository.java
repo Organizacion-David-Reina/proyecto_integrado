@@ -1,5 +1,7 @@
 package com.proyectointegrado.reina_cabrera_david.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +11,8 @@ import com.proyectointegrado.reina_cabrera_david.entity.CredentialsEntity;
 
 public interface CredentialsRepository extends JpaRepository<CredentialsEntity, Integer> {
 
+	Optional<CredentialsEntity> findByCorporateMail(String corporateMail);
+	
 	@Query("SELECT c.userId FROM CredentialsEntity c WHERE c.corporateMail = :corporateMail AND c.password = :password")
 	Integer authUser(@Param("corporateMail") String corporateMail, @Param("password") String password);
 

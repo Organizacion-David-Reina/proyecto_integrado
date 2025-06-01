@@ -14,7 +14,10 @@ import com.proyectointegrado.reina_cabrera_david.constants.ErrorConstants;
 import com.proyectointegrado.reina_cabrera_david.entity.BonusEntity;
 import com.proyectointegrado.reina_cabrera_david.entity.StudentEntity;
 import com.proyectointegrado.reina_cabrera_david.exceptions.InternalServerException;
+import com.proyectointegrado.reina_cabrera_david.repository.CredentialsRepository;
+import com.proyectointegrado.reina_cabrera_david.repository.ReservationRepository;
 import com.proyectointegrado.reina_cabrera_david.repository.StudentsRepository;
+import com.proyectointegrado.reina_cabrera_david.repository.TeachersRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +27,26 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentService {
 
 	private StudentsRepository studentsRepository;
+	private TeachersRepository teachersRepository;
+	private ReservationRepository reservationRepository;
+	private CredentialsRepository credentialsRepository;
 
-	protected StudentService(StudentsRepository studentsRepository) {
+	protected StudentService(StudentsRepository studentsRepository, TeachersRepository teachersRepository,
+			ReservationRepository reservationRepository, CredentialsRepository credentialsRepository) {
 		this.studentsRepository = studentsRepository;
+		this.teachersRepository = teachersRepository;
+		this.reservationRepository = reservationRepository;
+		this.credentialsRepository = credentialsRepository;
 	}
 
 	public void saveStudent(Student request) {
 		log.info("saveStudent - request: {} ", request.toString());
 		try {
-			boolean nifExists = studentsRepository.existsByNif(request.getNif());
+			boolean nifStudentsExists = studentsRepository.existsByNif(request.getNif());
+			boolean nifTeachersExists = teachersRepository.existsByNif(request.getNif());
+			boolean nifUsersExists = credentialsRepository.existsByNif(request.getNif());
 
-			if (nifExists) {
+			if (nifStudentsExists || nifTeachersExists || nifUsersExists) {
 				throw new DataIntegrityViolationException(ErrorConstants.NIF_ALREADY_REGISTERED);
 			}
 
@@ -88,14 +100,16 @@ public class StudentService {
 				.collect(Collectors.toList());
 		return students;
 	}
-	
+
+	@Transactional
 	public void deleteStudent(int studentId) {
 		log.info("deleteStudent - studentId: {} ", studentId);
 		try {
 			Optional<StudentEntity> optionalStudent = studentsRepository.findById(studentId);
-			
+
 			if (optionalStudent.isPresent()) {
 				StudentEntity studentEntity = optionalStudent.get();
+				reservationRepository.deleteByStudentEntityId(studentEntity.getId());
 				studentsRepository.delete(studentEntity);
 			} else {
 				throw new InternalServerException(ErrorConstants.STUDENT_NOT_EXISTS);

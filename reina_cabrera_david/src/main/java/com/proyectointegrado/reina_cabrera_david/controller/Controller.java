@@ -155,6 +155,11 @@ public class Controller {
 	public void deleteClass(@PathVariable("class_id") int classId) {
 		classService.deleteClass(classId);
 	}
+	
+	@DeleteMapping("delete-reservation/{student_id}/{class_id}")
+	public void deleteReservation( @PathVariable("student_id") int studentId, @PathVariable("class_id") int classId) {
+		classService.deleteReservation(studentId, classId);
+	}
 
 	@GetMapping("classes-list")
 	public List<DanceClass> getClasses() {

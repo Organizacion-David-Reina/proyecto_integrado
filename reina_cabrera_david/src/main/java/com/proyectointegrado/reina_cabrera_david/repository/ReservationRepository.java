@@ -9,4 +9,10 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 	int countByClassEntityId(int classId);
 
 	boolean existsByClassEntityIdAndStudentEntityId(int classId, int studentId);
+
+	void deleteByStudentEntityId(int studentId);
+
+	void deleteByClassEntityId(int classId);
+	
+	void deleteByClassEntityIdAndStudentEntityId(int classId, int studentId);
 }

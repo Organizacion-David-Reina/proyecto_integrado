@@ -54,4 +54,8 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Integer> {
 	boolean existsByTeacherAndDayAndTimeOverlapExcludingId(int teacherId, LocalDate day, LocalTime startTime,
 			LocalTime endTime, int classId);
 
+	
+	void deleteByTeacherId(int teacherId);
+
+	List<ClassEntity> findByTeacherId(int teacherId);
 }

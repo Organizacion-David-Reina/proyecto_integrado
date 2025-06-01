@@ -10,8 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.proyectointegrado.reina_cabrera_david.bean.Teacher;
 import com.proyectointegrado.reina_cabrera_david.constants.ErrorConstants;
+import com.proyectointegrado.reina_cabrera_david.entity.ClassEntity;
 import com.proyectointegrado.reina_cabrera_david.entity.TeacherEntity;
 import com.proyectointegrado.reina_cabrera_david.exceptions.InternalServerException;
+import com.proyectointegrado.reina_cabrera_david.repository.ClassRepository;
+import com.proyectointegrado.reina_cabrera_david.repository.CredentialsRepository;
+import com.proyectointegrado.reina_cabrera_david.repository.ReservationRepository;
+import com.proyectointegrado.reina_cabrera_david.repository.StudentsRepository;
 import com.proyectointegrado.reina_cabrera_david.repository.TeachersRepository;
 
 import jakarta.transaction.Transactional;
@@ -21,19 +26,33 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TeacherService {
 
+	private StudentsRepository studentsRepository;
 	private TeachersRepository teachersRepository;
+	private CredentialsRepository credentialsRepository;
+	private ClassRepository classRepository;
+	private ReservationRepository reservationRepository;
 
-	protected TeacherService(TeachersRepository teachersRepository) {
+	protected TeacherService(StudentsRepository studentsRepository, TeachersRepository teachersRepository,
+			CredentialsRepository credentialsRepository, ClassRepository classRepository,
+			ReservationRepository reservationRepository) {
+		this.studentsRepository = studentsRepository;
 		this.teachersRepository = teachersRepository;
+		this.credentialsRepository = credentialsRepository;
+		this.classRepository = classRepository;
+		this.reservationRepository = reservationRepository;
 	}
 
 	public void saveTeacher(Teacher request) {
 		log.info("saveTeacher - request: {} ", request.toString());
 		try {
-			boolean nifExists = teachersRepository.existsByNif(request.getNif());
-			boolean mailExists = teachersRepository.existsByMail(request.getMail());
+			boolean nifStudentsExists = studentsRepository.existsByNif(request.getNif());
+			boolean nifTeachersExists = teachersRepository.existsByNif(request.getNif());
+			boolean nifUsersExists = credentialsRepository.existsByNif(request.getNif());
 
-			if (nifExists || mailExists) {
+			boolean mailUsersExists = credentialsRepository.existsByCorporateMail(request.getMail());
+			boolean mailTeachersExists = teachersRepository.existsByMail(request.getMail());
+
+			if (nifStudentsExists || nifTeachersExists || nifUsersExists || mailUsersExists || mailTeachersExists) {
 				throw new DataIntegrityViolationException(ErrorConstants.NIF_MAIL_ALREADY_REGISTERED);
 			}
 
@@ -72,15 +91,23 @@ public class TeacherService {
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
 		}
 	}
-	
+
+	@Transactional
 	public void deleteTeacher(int teacherId) {
 		log.info("deleteTeacher - teacherId: {} ", teacherId);
 		try {
 			Optional<TeacherEntity> optionalTeacher = teachersRepository.findById(teacherId);
-			
+
 			if (optionalTeacher.isPresent()) {
-				TeacherEntity teachertEntity = optionalTeacher.get();
-				teachersRepository.delete(teachertEntity);
+				TeacherEntity teacherEntity = optionalTeacher.get();
+				List<ClassEntity> classes = classRepository.findByTeacherId(teacherEntity.getId());
+
+				for (ClassEntity clazz : classes) {
+					reservationRepository.deleteByClassEntityId(clazz.getId());
+				}
+
+				classRepository.deleteByTeacherId(teacherEntity.getId());
+				teachersRepository.delete(teacherEntity);
 			} else {
 				throw new InternalServerException(ErrorConstants.TEACHER_NOT_EXISTS);
 			}
@@ -91,7 +118,7 @@ public class TeacherService {
 	}
 
 	private TeacherEntity mapToTeacherEntity(Teacher request) {
-		return TeacherEntity.builder().id(request.getId()).name(request.getName()).lastname(request.getLastname())
+		return TeacherEntity.builder().id(request.getId() != -1 ? request.getId() : null).name(request.getName()).lastname(request.getLastname())
 				.nif(request.getNif()).mail(request.getMail()).build();
 	}
 

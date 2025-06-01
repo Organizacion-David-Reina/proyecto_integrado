@@ -21,7 +21,7 @@ public class CredentialsEntity {
 
 	@Id
 	@Column(name = "user_id")
-	private int userId;
+	private Integer userId;
 
 	private String nif;
 	
