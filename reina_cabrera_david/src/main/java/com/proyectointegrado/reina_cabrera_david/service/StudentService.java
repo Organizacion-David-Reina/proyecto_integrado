@@ -14,10 +14,8 @@ import com.proyectointegrado.reina_cabrera_david.constants.ErrorConstants;
 import com.proyectointegrado.reina_cabrera_david.entity.BonusEntity;
 import com.proyectointegrado.reina_cabrera_david.entity.StudentEntity;
 import com.proyectointegrado.reina_cabrera_david.exceptions.InternalServerException;
-import com.proyectointegrado.reina_cabrera_david.repository.CredentialsRepository;
 import com.proyectointegrado.reina_cabrera_david.repository.ReservationRepository;
 import com.proyectointegrado.reina_cabrera_david.repository.StudentsRepository;
-import com.proyectointegrado.reina_cabrera_david.repository.TeachersRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -27,36 +25,23 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentService {
 
 	private StudentsRepository studentsRepository;
-	private TeachersRepository teachersRepository;
 	private ReservationRepository reservationRepository;
-	private CredentialsRepository credentialsRepository;
 
-	protected StudentService(StudentsRepository studentsRepository, TeachersRepository teachersRepository,
-			ReservationRepository reservationRepository, CredentialsRepository credentialsRepository) {
+	protected StudentService(StudentsRepository studentsRepository, ReservationRepository reservationRepository) {
 		this.studentsRepository = studentsRepository;
-		this.teachersRepository = teachersRepository;
 		this.reservationRepository = reservationRepository;
-		this.credentialsRepository = credentialsRepository;
 	}
 
 	public void saveStudent(Student request) {
 		log.info("saveStudent - request: {} ", request.toString());
 		try {
-			boolean nifStudentsExists = studentsRepository.existsByNif(request.getNif());
-			boolean nifTeachersExists = teachersRepository.existsByNif(request.getNif());
-			boolean nifUsersExists = credentialsRepository.existsByNif(request.getNif());
-
-			if (nifStudentsExists || nifTeachersExists || nifUsersExists) {
-				throw new DataIntegrityViolationException(ErrorConstants.NIF_ALREADY_REGISTERED);
-			}
-
 			BonusEntity bonusEntity = mapToBonusEntity(request);
 			StudentEntity studentEntity = mapToStudentEntity(request, bonusEntity);
 			studentsRepository.save(studentEntity);
 
 		} catch (DataIntegrityViolationException e) {
 			log.error("saveStudent - error - {}", e.getMessage());
-			throw new InternalServerException(ErrorConstants.NIF_ALREADY_REGISTERED, e);
+			throw new InternalServerException(ErrorConstants.CREDENTIALS_ALREADY_REGISTERED, e);
 		} catch (Exception e) {
 			log.error("saveStudent - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
@@ -66,7 +51,8 @@ public class StudentService {
 	public List<Student> getAllStudents() {
 		List<Student> students = studentsRepository
 				.findAll().stream().map(s -> Student.builder().id(s.getId()).name(s.getName()).lastname(s.getLastname())
-						.nif(s.getNif()).bonus(Bonus.builder().id(s.getBonus().getId())
+						.nif(s.getNif()).address(s.getAddress()).phoneNumber(s.getPhoneNumber())
+						.dayOfBirth(s.getDayOfBirth()).bonus(Bonus.builder().id(s.getBonus().getId())
 								.bondType(s.getBonus().getBondType()).price(s.getBonus().getPrice()).build())
 						.build())
 				.collect(Collectors.toList());
@@ -79,12 +65,12 @@ public class StudentService {
 		log.info("updateStudent - user: {} ", request.toString());
 		try {
 			BonusEntity bonusEntity = mapToBonusEntity(request);
-			StudentEntity studentEntity = StudentEntity.builder().id(request.getId()).name(request.getName())
-					.lastname(request.getLastname()).nif(request.getNif()).bonus(bonusEntity).build();
+			StudentEntity studentEntity = mapToStudentEntity(request, bonusEntity);
 			studentsRepository.save(studentEntity);
+			studentsRepository.flush();
 		} catch (DataIntegrityViolationException e) {
 			log.error("updateStudent - error - {}", e.getMessage());
-			throw new InternalServerException(ErrorConstants.NIF_ALREADY_REGISTERED, e);
+			throw new InternalServerException(ErrorConstants.CREDENTIALS_ALREADY_REGISTERED, e);
 		} catch (Exception e) {
 			log.error("updateStudent - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
@@ -121,8 +107,9 @@ public class StudentService {
 	}
 
 	private StudentEntity mapToStudentEntity(Student request, BonusEntity bonusEntity) {
-		return StudentEntity.builder().name(request.getName()).lastname(request.getLastname()).nif(request.getNif())
-				.bonus(bonusEntity).build();
+		return StudentEntity.builder().id(request.getId() != -1 ? request.getId() : null).name(request.getName())
+				.lastname(request.getLastname()).nif(request.getNif()).address(request.getAddress())
+				.phoneNumber(request.getPhoneNumber()).dayOfBirth(request.getDayOfBirth()).bonus(bonusEntity).build();
 	}
 
 	private BonusEntity mapToBonusEntity(Student request) {

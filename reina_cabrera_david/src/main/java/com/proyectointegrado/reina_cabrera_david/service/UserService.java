@@ -1,5 +1,6 @@
 package com.proyectointegrado.reina_cabrera_david.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,8 +20,6 @@ import com.proyectointegrado.reina_cabrera_david.entity.RoleEntity;
 import com.proyectointegrado.reina_cabrera_david.entity.UserEntity;
 import com.proyectointegrado.reina_cabrera_david.exceptions.InternalServerException;
 import com.proyectointegrado.reina_cabrera_david.repository.CredentialsRepository;
-import com.proyectointegrado.reina_cabrera_david.repository.StudentsRepository;
-import com.proyectointegrado.reina_cabrera_david.repository.TeachersRepository;
 import com.proyectointegrado.reina_cabrera_david.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -31,15 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 
 	private UserRepository userRepository;
-	private StudentsRepository studentsRepository;
-	private TeachersRepository teachersRepository;
 	private CredentialsRepository credentialsRepository;
 
-	protected UserService(UserRepository userRepository, StudentsRepository studentsRepository,
-			TeachersRepository teachersRepository, CredentialsRepository credentialsRepository) {
+	protected UserService(UserRepository userRepository, CredentialsRepository credentialsRepository) {
 		this.userRepository = userRepository;
-		this.studentsRepository = studentsRepository;
-		this.teachersRepository = teachersRepository;
 		this.credentialsRepository = credentialsRepository;
 	}
 
@@ -50,14 +44,14 @@ public class UserService {
 		try {
 			if (credentialsOpt.isPresent()) {
 				CredentialsEntity credentials = credentialsOpt.get();
-				String decryptedPassword = EncryptionRSA.decrypt(credentials.getPassword(), KeyStoreHelper.getPrivateKey());
+				String decryptedPassword = EncryptionRSA.decrypt(credentials.getPassword(),
+						KeyStoreHelper.getPrivateKey());
 				if (decryptedPassword.equals(password)) {
 					Optional<UserEntity> userEntityOpt = userRepository.findById(credentials.getUserId());
-					return userEntityOpt
-							.map(u -> User.builder().id(u.getId()).name(u.getName()).lastname(u.getLastname())
-									.corporateMail(corporateMail).phoneNumber(u.getPhoneNumber())
-									.address(u.getAddress()).dayOfBirth(u.getDayOfBirth())
-									.role(Role.builder().id(u.getRol().getId()).rol(u.getRol().getRol()).build()).build())
+					return userEntityOpt.map(u -> User.builder().id(u.getId()).name(u.getName())
+							.lastname(u.getLastname()).corporateMail(corporateMail).phoneNumber(u.getPhoneNumber())
+							.address(u.getAddress()).dayOfBirth(u.getDayOfBirth())
+							.role(Role.builder().id(u.getRol().getId()).rol(u.getRol().getRol()).build()).build())
 							.orElse(null);
 				}
 			}
@@ -72,17 +66,6 @@ public class UserService {
 	public void signUp(UserRequest request) {
 		log.info("singUp - request: {} ", request.toString());
 		try {
-			boolean nifStudentsExists = studentsRepository.existsByNif(request.getCredentials().getNif());
-			boolean nifTeachersExists = teachersRepository.existsByNif(request.getCredentials().getNif());
-			boolean nifUsersExists = credentialsRepository.existsByNif(request.getCredentials().getNif());
-
-			boolean mailExists = credentialsRepository.existsByCorporateMail(request.getUser().getCorporateMail());
-			boolean mailTeachersExists = teachersRepository.existsByMail(request.getUser().getCorporateMail());
-
-			if (nifStudentsExists || nifTeachersExists || nifUsersExists || mailExists || mailTeachersExists) {
-				throw new DataIntegrityViolationException(ErrorConstants.NIF_MAIL_ALREADY_REGISTERED);
-			}
-
 			String encryptedPassword = EncryptionRSA.encrypt(request.getCredentials().getPassword(),
 					KeyStoreHelper.getPublicKey());
 			request.getCredentials().setPassword(encryptedPassword);
@@ -96,7 +79,7 @@ public class UserService {
 
 		} catch (DataIntegrityViolationException e) {
 			log.error("singUp - error - {}", e.getMessage());
-			throw new InternalServerException(ErrorConstants.NIF_MAIL_ALREADY_REGISTERED, e);
+			throw new InternalServerException(ErrorConstants.CREDENTIALS_ALREADY_REGISTERED, e);
 		} catch (Exception e) {
 			log.error("singUp - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
@@ -106,7 +89,8 @@ public class UserService {
 	public List<User> getAllUsers() {
 		List<User> users = userRepository.getAllUsersExceptDirectors().stream()
 				.map(u -> User.builder().id(u.getId()).name(u.getName()).lastname(u.getLastname())
-						.corporateMail(credentialsRepository.findMailById(u.getId()))
+						.corporateMail(credentialsRepository.findMailById(u.getId())).phoneNumber(u.getPhoneNumber())
+						.address(u.getAddress()).dayOfBirth(u.getDayOfBirth())
 						.role(Role.builder().id(u.getRol().getId()).rol(u.getRol().getRol()).build()).build())
 				.collect(Collectors.toList());
 		return users;
@@ -115,17 +99,26 @@ public class UserService {
 	@Modifying(clearAutomatically = true)
 	@Transactional
 	public void updateUser(User user) {
-		log.info("updateUser - user: {} ", user.toString());
+		log.info("updateUser - user: {}", user);
 		try {
 			RoleEntity roleEntity = RoleEntity.builder().id(user.getRole().getId()).rol(user.getRole().getRol())
 					.build();
+
+			UserEntity existingUser = userRepository.findById(user.getId())
+					.orElseThrow(() -> new InternalServerException(ErrorConstants.USER_NOT_FOUND));
+
+			LocalDate dayOfBirth = existingUser.getDayOfBirth();
+
 			UserEntity userEntity = UserEntity.builder().id(user.getId()).name(user.getName())
-					.lastname(user.getLastname()).rol(roleEntity).build();
+					.lastname(user.getLastname()).address(user.getAddress()).phoneNumber(user.getPhoneNumber())
+					.dayOfBirth(dayOfBirth).rol(roleEntity).build();
+
 			userRepository.save(userEntity);
+			userRepository.flush();
 			credentialsRepository.updateCorporateMail(user.getId(), user.getCorporateMail());
 		} catch (DataIntegrityViolationException e) {
 			log.error("updateUser - error - {}", e.getMessage());
-			throw new InternalServerException(ErrorConstants.MAIL_ALREADY_REGISTERED, e);
+			throw new InternalServerException(ErrorConstants.MAIL_OR_PHONE_ALREADY_REGISTERED, e);
 		} catch (Exception e) {
 			log.error("updateUser - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
@@ -153,10 +146,8 @@ public class UserService {
 
 	private UserEntity mapToUserEntity(UserRequest request, RoleEntity roleEntity) {
 		return UserEntity.builder().name(request.getUser().getName()).lastname(request.getUser().getLastname())
-				.address(request.getUser().getAddress())
-				.phoneNumber(request.getUser().getPhoneNumber())
-				.dayOfBirth(request.getUser().getDayOfBirth())
-				.rol(roleEntity).build();
+				.address(request.getUser().getAddress()).phoneNumber(request.getUser().getPhoneNumber())
+				.dayOfBirth(request.getUser().getDayOfBirth()).rol(roleEntity).build();
 	}
 
 	private CredentialsEntity mapToCredentialsEntity(UserRequest request, Integer savedUserId) {

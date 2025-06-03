@@ -1,5 +1,8 @@
 package com.proyectointegrado.reina_cabrera_david.entity;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,4 +34,12 @@ public class TeacherEntity {
 	private String mail;
 	
 	private String nif;
+	
+	@Column(name = "phone_number")
+	private String phoneNumber;
+	
+	private String address;
+	
+	@Column(name = "date_of_birth")
+	private LocalDate dayOfBirth;
 }

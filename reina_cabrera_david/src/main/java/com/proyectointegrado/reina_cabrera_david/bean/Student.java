@@ -1,5 +1,7 @@
 package com.proyectointegrado.reina_cabrera_david.bean;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,4 +26,10 @@ public class Student {
 	private String nif;
 	
 	private Bonus bonus;
+	
+	private String phoneNumber;
+
+	private String address;
+
+	private LocalDate dayOfBirth;
 }

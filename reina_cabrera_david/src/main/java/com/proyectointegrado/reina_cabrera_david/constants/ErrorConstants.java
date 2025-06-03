@@ -2,11 +2,13 @@ package com.proyectointegrado.reina_cabrera_david.constants;
 
 public class ErrorConstants {
 
-	public static String NIF_MAIL_ALREADY_REGISTERED = "NIF o correo ya registrado";
+	public static String CREDENTIALS_ALREADY_REGISTERED = "Credenciales ya registrado";
 
-	public static String MAIL_ALREADY_REGISTERED = "Correo ya registrado";
+	public static String MAIL_OR_PHONE_ALREADY_REGISTERED = "Correo o teléfono ya registrado";
 
 	public static String NIF_ALREADY_REGISTERED = "Nif ya registrado";
+	
+	public static String USER_NOT_FOUND = "Usuario no encontrado";
 
 	public static String INTERNAL_ERROR = "Ha ocurrido un error interno";
 
@@ -27,4 +29,6 @@ public class ErrorConstants {
 	public static String STUDENT_ALREADY_RESERVED = "El alumno ya tiene una reserva";
 	
 	public static String CLASS_IS_FULL = "La clase ya está completa.";
+	
+	public static String STUDENT_ALREADY_HAS_RESERVATION_IN_TIME_SLOT = "El alumno ya tiene una reserva a esa hora";
 }

@@ -150,6 +150,7 @@ public class ClassService {
 				existingClass.setEndTime(LocalTime.parse(request.getEndTime()));
 
 				classRepository.save(existingClass);
+				classRepository.flush();
 			} else {
 				throw new InternalServerException(ErrorConstants.TEACHER_NOT_AVAILABLE);
 			}
@@ -170,13 +171,26 @@ public class ClassService {
 				ClassEntity classEntity = classRepository.findById(request.getClassId()).get();
 				int roomCapacity = classEntity.getRoom().getCapacity();
 				int reservationCount = reservationRepository.countByClassEntityId(request.getClassId());
-				
-				if (reservationCount == roomCapacity) {
+
+				if (reservationCount >= roomCapacity) {
 					throw new InternalServerException(ErrorConstants.CLASS_IS_FULL);
 				}
+
+				List<ReservationEntity> studentReservations = reservationRepository
+						.findByStudentEntityId(studentEntity.getId());
+
+				for (ReservationEntity existingReservation : studentReservations) {
+					ClassEntity existingClass = existingReservation.getClassEntity();
+
+					if (existingClass.getDay().equals(classEntity.getDay())) {
+						if (timesOverlap(existingClass.getStartTime(), existingClass.getEndTime(),
+								classEntity.getStartTime(), classEntity.getEndTime())) {
+							throw new InternalServerException(
+									ErrorConstants.STUDENT_ALREADY_HAS_RESERVATION_IN_TIME_SLOT);
+						}
+					}
+				}
 				
-				ReservationEntity reservationEntity = ReservationEntity.builder().classEntity(classEntity)
-						.studentEntity(studentEntity).build();
 				boolean alreadyReserved = reservationRepository
 						.existsByClassEntityIdAndStudentEntityId(classEntity.getId(), studentEntity.getId());
 
@@ -184,7 +198,11 @@ public class ClassService {
 					throw new InternalServerException(ErrorConstants.STUDENT_ALREADY_RESERVED);
 				}
 
+				ReservationEntity reservationEntity = ReservationEntity.builder().classEntity(classEntity)
+						.studentEntity(studentEntity).build();
+
 				reservationRepository.save(reservationEntity);
+
 			} else {
 				throw new InternalServerException(ErrorConstants.STUDENT_NOT_EXISTS);
 			}
@@ -193,13 +211,13 @@ public class ClassService {
 			throw new InternalServerException(e.getMessage(), e);
 		}
 	}
-	
+
 	@Transactional
 	public void deleteClass(int classId) {
 		log.info("deleteClass - classId: {} ", classId);
 		try {
 			Optional<ClassEntity> optionalClass = classRepository.findById(classId);
-			
+
 			if (optionalClass.isPresent()) {
 				ClassEntity classEntity = optionalClass.get();
 				reservationRepository.deleteByClassEntityId(classEntity.getId());
@@ -212,14 +230,14 @@ public class ClassService {
 			throw new InternalServerException(e.getMessage(), e);
 		}
 	}
-	
+
 	@Transactional
 	public void deleteReservation(int studentId, int classId) {
 		log.info("deleteClass - classId: {} ", classId);
 		try {
 			Optional<ClassEntity> optionalClass = classRepository.findById(classId);
 			Optional<StudentEntity> optionalStudent = studentsRepository.findById(studentId);
-			
+
 			if (optionalClass.isPresent() && optionalStudent.isPresent()) {
 				reservationRepository.deleteByClassEntityIdAndStudentEntityId(classId, studentId);
 			} else {
@@ -244,7 +262,7 @@ public class ClassService {
 		return Style.builder().id(c.getId()).style(c.getStyle()).build();
 	}
 
-	private ClassEntity MapToClassEntity(DanceClass request) {		
+	private ClassEntity MapToClassEntity(DanceClass request) {
 		return ClassEntity.builder().id(request.getId() != -1 ? request.getId() : null)
 				.style(StyleEntity.builder().id(request.getStyle().getId()).style(request.getStyle().getStyle())
 						.build())
@@ -255,5 +273,9 @@ public class ClassService {
 						.capacity(request.getRoom().getCapacity()).build())
 				.level(request.getLevel()).day(request.getDay()).startTime(LocalTime.parse(request.getStartTime()))
 				.endTime(LocalTime.parse(request.getEndTime())).build();
+	}
+	
+	private boolean timesOverlap(LocalTime start1, LocalTime end1, LocalTime start2, LocalTime end2) {
+	    return !start1.isAfter(end2) && !start2.isAfter(end1);
 	}
 }
