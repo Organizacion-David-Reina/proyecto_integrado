@@ -11,6 +11,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class RoleEntity.
+ * Represents the roles table in the database.
+ */
 @Entity
 @Table(name = "roles")
 @NoArgsConstructor
@@ -20,9 +24,15 @@ import lombok.Setter;
 @Builder
 public class RoleEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
-	private String rol;
+    /**
+     * The id.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * The rol.
+     */
+    private String rol;
 }

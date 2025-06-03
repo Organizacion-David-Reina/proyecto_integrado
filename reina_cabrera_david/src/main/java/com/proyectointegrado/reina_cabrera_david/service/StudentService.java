@@ -20,18 +20,37 @@ import com.proyectointegrado.reina_cabrera_david.repository.StudentsRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * The Class StudentService
+ */
 @Service
 @Slf4j
 public class StudentService {
 
+	/** The Students Repository */
 	private StudentsRepository studentsRepository;
+	
+	/** The Reservation Repository */
 	private ReservationRepository reservationRepository;
 
+	/**
+	 * Constructor injecting required repositories.
+	 * 
+	 * @param studentsRepository    repository for student entities
+	 * @param reservationRepository repository for reservation entities
+	 */
 	protected StudentService(StudentsRepository studentsRepository, ReservationRepository reservationRepository) {
 		this.studentsRepository = studentsRepository;
 		this.reservationRepository = reservationRepository;
 	}
 
+	/**
+	 * Saves a new student in the database.
+	 * 
+	 * @param request the student data to save
+	 * @throws InternalServerException if there is a data integrity violation or
+	 *                                 internal error
+	 */
 	public void saveStudent(Student request) {
 		log.info("saveStudent - request: {} ", request.toString());
 		try {
@@ -48,6 +67,11 @@ public class StudentService {
 		}
 	}
 
+	/**
+	 * Retrieves all students with their associated bonus information.
+	 * 
+	 * @return list of students
+	 */
 	public List<Student> getAllStudents() {
 		List<Student> students = studentsRepository
 				.findAll().stream().map(s -> Student.builder().id(s.getId()).name(s.getName()).lastname(s.getLastname())
@@ -59,6 +83,13 @@ public class StudentService {
 		return students;
 	}
 
+	/**
+	 * Updates an existing student's data.
+	 * 
+	 * @param request the student data to update
+	 * @throws InternalServerException if there is a data integrity violation or
+	 *                                 internal error
+	 */
 	@Modifying(clearAutomatically = true)
 	@Transactional
 	public void updateStudent(Student request) {
@@ -77,6 +108,12 @@ public class StudentService {
 		}
 	}
 
+	/**
+	 * Retrieves all students enrolled in a specific class by its ID.
+	 * 
+	 * @param classId the ID of the class
+	 * @return list of students enrolled in the class
+	 */
 	public List<Student> getStudentsByClassId(int classId) {
 		List<Student> students = studentsRepository
 				.findStudentsByClassId(classId).stream().map(s -> Student.builder().id(s.getId()).name(s.getName())
@@ -87,6 +124,13 @@ public class StudentService {
 		return students;
 	}
 
+	/**
+	 * Deletes a student and all their reservations.
+	 * 
+	 * @param studentId the ID of the student to delete
+	 * @throws InternalServerException if the student does not exist or on other
+	 *                                 errors
+	 */
 	@Transactional
 	public void deleteStudent(int studentId) {
 		log.info("deleteStudent - studentId: {} ", studentId);
@@ -106,12 +150,25 @@ public class StudentService {
 		}
 	}
 
+	/**
+	 * Maps a Student bean to a StudentEntity for persistence.
+	 * 
+	 * @param request     the Student bean
+	 * @param bonusEntity the BonusEntity associated with the student
+	 * @return the mapped StudentEntity
+	 */
 	private StudentEntity mapToStudentEntity(Student request, BonusEntity bonusEntity) {
 		return StudentEntity.builder().id(request.getId() != -1 ? request.getId() : null).name(request.getName())
 				.lastname(request.getLastname()).nif(request.getNif()).address(request.getAddress())
 				.phoneNumber(request.getPhoneNumber()).dayOfBirth(request.getDayOfBirth()).bonus(bonusEntity).build();
 	}
 
+	/**
+	 * Maps the Bonus information from a Student bean to a BonusEntity.
+	 * 
+	 * @param request the Student bean
+	 * @return the mapped BonusEntity
+	 */
 	private BonusEntity mapToBonusEntity(Student request) {
 		return BonusEntity.builder().id(request.getBonus().getId()).bondType(request.getBonus().getBondType())
 				.price(request.getBonus().getPrice()).build();

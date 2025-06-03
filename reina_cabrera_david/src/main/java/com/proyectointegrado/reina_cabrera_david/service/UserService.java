@@ -25,18 +25,39 @@ import com.proyectointegrado.reina_cabrera_david.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * The Class UserService
+ */
 @Service
 @Slf4j
 public class UserService {
 
+	/** The User Repository */
 	private UserRepository userRepository;
+	
+	/** The Credentials Repository */
 	private CredentialsRepository credentialsRepository;
 
+	/**
+	 * Constructor injecting required repositories.
+	 * 
+	 * @param userRepository        repository for UserEntity persistence
+	 * @param credentialsRepository repository for CredentialsEntity persistence
+	 */
 	protected UserService(UserRepository userRepository, CredentialsRepository credentialsRepository) {
 		this.userRepository = userRepository;
 		this.credentialsRepository = credentialsRepository;
 	}
 
+	/**
+	 * Authenticates a user with corporate email and password.
+	 * Decrypts stored password and compares it with the provided password.
+	 * 
+	 * @param corporateMail user's corporate email
+	 * @param password      user's plaintext password
+	 * @return User object if authentication succeeds, otherwise null
+	 * @throws InternalServerException if there is an error during credential validation
+	 */
 	public User login(String corporateMail, String password) {
 		log.info("login - corporateMail: {} - password: // ", corporateMail);
 
@@ -56,15 +77,22 @@ public class UserService {
 				}
 			}
 		} catch (Exception e) {
-			throw new InternalServerException("Error durante la validación de credenciales.", e);
+			throw new InternalServerException("Error during credential validation.", e);
 		}
 
 		log.info("login - end");
 		return null;
 	}
 
+	/**
+	 * Registers a new user along with their credentials.
+	 * Encrypts the password before saving.
+	 * 
+	 * @param request UserRequest containing user and credentials info
+	 * @throws InternalServerException if credentials are already registered or other internal errors occur
+	 */
 	public void signUp(UserRequest request) {
-		log.info("singUp - request: {} ", request.toString());
+		log.info("signUp - request: {} ", request.toString());
 		try {
 			String encryptedPassword = EncryptionRSA.encrypt(request.getCredentials().getPassword(),
 					KeyStoreHelper.getPublicKey());
@@ -78,14 +106,19 @@ public class UserService {
 			credentialsRepository.save(credentialsEntity);
 
 		} catch (DataIntegrityViolationException e) {
-			log.error("singUp - error - {}", e.getMessage());
+			log.error("signUp - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.CREDENTIALS_ALREADY_REGISTERED, e);
 		} catch (Exception e) {
-			log.error("singUp - error - {}", e.getMessage());
+			log.error("signUp - error - {}", e.getMessage());
 			throw new InternalServerException(ErrorConstants.INTERNAL_ERROR, e);
 		}
 	}
 
+	/**
+	 * Retrieves all users excluding those with director roles.
+	 * 
+	 * @return List of User objects
+	 */
 	public List<User> getAllUsers() {
 		List<User> users = userRepository.getAllUsersExceptDirectors().stream()
 				.map(u -> User.builder().id(u.getId()).name(u.getName()).lastname(u.getLastname())
@@ -96,6 +129,14 @@ public class UserService {
 		return users;
 	}
 
+	/**
+	 * Updates an existing user's information and credentials.
+	 * Maintains original date of birth.
+	 * 
+	 * @param user User object with updated information
+	 * @throws InternalServerException if user not found, or mail/phone is already registered,
+	 *                                 or other internal errors
+	 */
 	@Modifying(clearAutomatically = true)
 	@Transactional
 	public void updateUser(User user) {
@@ -125,6 +166,12 @@ public class UserService {
 		}
 	}
 
+	/**
+	 * Deletes a user and their credentials by user ID.
+	 * 
+	 * @param userId the ID of the user to delete
+	 * @throws InternalServerException if the user does not exist or other errors occur
+	 */
 	@Transactional
 	public void deleteUser(int userId) {
 		log.info("deleteUser - userId: {} ", userId);
@@ -144,12 +191,26 @@ public class UserService {
 		}
 	}
 
+	/**
+	 * Maps a UserRequest to a UserEntity.
+	 * 
+	 * @param request   the UserRequest containing user data
+	 * @param roleEntity the RoleEntity associated with the user
+	 * @return UserEntity mapped from request
+	 */
 	private UserEntity mapToUserEntity(UserRequest request, RoleEntity roleEntity) {
 		return UserEntity.builder().name(request.getUser().getName()).lastname(request.getUser().getLastname())
 				.address(request.getUser().getAddress()).phoneNumber(request.getUser().getPhoneNumber())
 				.dayOfBirth(request.getUser().getDayOfBirth()).rol(roleEntity).build();
 	}
 
+	/**
+	 * Maps a UserRequest to a CredentialsEntity.
+	 * 
+	 * @param request    the UserRequest containing credentials data
+	 * @param savedUserId the ID of the saved user
+	 * @return CredentialsEntity mapped from request
+	 */
 	private CredentialsEntity mapToCredentialsEntity(UserRequest request, Integer savedUserId) {
 		return CredentialsEntity.builder().userId(savedUserId)
 				.corporateMail(request.getCredentials().getCorporateMail()).nif(request.getCredentials().getNif())

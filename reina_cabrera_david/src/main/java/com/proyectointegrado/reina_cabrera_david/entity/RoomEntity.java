@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class RoomEntity.
+ */
 @Entity
 @Table(name = "rooms")
 @NoArgsConstructor
@@ -21,12 +24,21 @@ import lombok.Setter;
 @Builder
 public class RoomEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
-	private int capacity;
-	
-	@Column(name = "room_name")
-	private String roomName;
+    /**
+     * The id.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * The capacity.
+     */
+    private int capacity;
+
+    /**
+     * The roomName.
+     */
+    @Column(name = "room_name")
+    private String roomName;
 }

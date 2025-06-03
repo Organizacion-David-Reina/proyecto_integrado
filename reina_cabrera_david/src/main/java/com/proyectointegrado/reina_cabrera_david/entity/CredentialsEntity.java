@@ -10,6 +10,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class CredentialsEntity.
+ * Represents the credentials table in the database.
+ */
 @Entity
 @Table(name = "credentials")
 @NoArgsConstructor
@@ -19,14 +23,18 @@ import lombok.Setter;
 @Builder
 public class CredentialsEntity {
 
-	@Id
-	@Column(name = "user_id")
-	private Integer userId;
+    /** The userId. */
+    @Id
+    @Column(name = "user_id")
+    private Integer userId;
 
-	private String nif;
-	
-	@Column(name = "corporate_mail")
-	private String corporateMail;
+    /** The nif. */
+    private String nif;
 
-	private String password;
+    /** The corporateMail. */
+    @Column(name = "corporate_mail")
+    private String corporateMail;
+
+    /** The password. */
+    private String password;
 }

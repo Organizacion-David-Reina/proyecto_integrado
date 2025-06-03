@@ -1,6 +1,12 @@
 package com.proyectointegrado.reina_cabrera_david.constants;
 
+/**
+ * The Class ApiConstants.
+ */
 public class ApiConstants {
 
-	public static final String ENDPOINT = "api/users/administration";
+    /**
+     * The Constant ENDPOINT.
+     */
+    public static final String ENDPOINT = "api/users/administration";
 }

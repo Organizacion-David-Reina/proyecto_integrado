@@ -20,14 +20,29 @@ import com.proyectointegrado.reina_cabrera_david.repository.TeachersRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * The Class TeacherService
+ */
 @Service
 @Slf4j
 public class TeacherService {
 
+	/** The Teachers Repository */
 	private TeachersRepository teachersRepository;
+	
+	/** The Class Repository */
 	private ClassRepository classRepository;
+	
+	/** The Reservation Repository */
 	private ReservationRepository reservationRepository;
 
+	/**
+	 * Constructor to inject the required repositories.
+	 *
+	 * @param teachersRepository   Repository to manage TeacherEntity persistence
+	 * @param classRepository      Repository to manage ClassEntity persistence
+	 * @param reservationRepository Repository to manage ReservationEntity persistence
+	 */
 	protected TeacherService(TeachersRepository teachersRepository, ClassRepository classRepository,
 			ReservationRepository reservationRepository) {
 		this.teachersRepository = teachersRepository;
@@ -35,6 +50,13 @@ public class TeacherService {
 		this.reservationRepository = reservationRepository;
 	}
 
+	/**
+	 * Saves a new teacher to the database.
+	 *
+	 * @param request Teacher object containing the information to persist
+	 * @throws InternalServerException if a data integrity violation occurs (e.g. duplicate credentials)
+	 *                                 or other internal errors
+	 */
 	public void saveTeacher(Teacher request) {
 		log.info("saveTeacher - request: {} ", request.toString());
 		try {
@@ -50,6 +72,11 @@ public class TeacherService {
 		}
 	}
 
+	/**
+	 * Retrieves all teachers from the database.
+	 *
+	 * @return List of Teacher objects representing all stored teachers
+	 */
 	public List<Teacher> getAllTeachers() {
 		List<Teacher> teachers = teachersRepository.findAll().stream()
 				.map(t -> Teacher.builder().id(t.getId()).name(t.getName()).lastname(t.getLastname()).nif(t.getNif())
@@ -59,6 +86,13 @@ public class TeacherService {
 		return teachers;
 	}
 
+	/**
+	 * Updates an existing teacher's information.
+	 *
+	 * @param request Teacher object containing updated information
+	 * @throws InternalServerException if there is a data integrity violation (e.g. email or phone already registered)
+	 *                                 or other internal errors
+	 */
 	@Modifying(clearAutomatically = true)
 	@Transactional
 	public void updateTeacher(Teacher request) {
@@ -76,6 +110,12 @@ public class TeacherService {
 		}
 	}
 
+	/**
+	 * Deletes a teacher by their ID. Also deletes all associated classes and reservations.
+	 *
+	 * @param teacherId The ID of the teacher to delete
+	 * @throws InternalServerException if the teacher does not exist or any other error occurs
+	 */
 	@Transactional
 	public void deleteTeacher(int teacherId) {
 		log.info("deleteTeacher - teacherId: {} ", teacherId);
@@ -101,6 +141,12 @@ public class TeacherService {
 		}
 	}
 
+	/**
+	 * Maps a Teacher bean to a TeacherEntity for database persistence.
+	 *
+	 * @param request Teacher bean to map
+	 * @return TeacherEntity object mapped from the bean
+	 */
 	private TeacherEntity mapToTeacherEntity(Teacher request) {
 		return TeacherEntity.builder().id(request.getId() != -1 ? request.getId() : null).name(request.getName())
 				.lastname(request.getLastname()).nif(request.getNif()).mail(request.getMail())

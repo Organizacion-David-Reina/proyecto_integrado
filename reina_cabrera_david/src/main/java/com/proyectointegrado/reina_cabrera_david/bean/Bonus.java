@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class Bonus.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -13,9 +16,18 @@ import lombok.Setter;
 @Builder
 public class Bonus {
 
-	private int id;
-	
-	private String bondType;
-	
-	private double price;
+    /**
+     * The id.
+     */
+    private int id;
+    
+    /**
+     * The bondType.
+     */
+    private String bondType;
+    
+    /**
+     * The price.
+     */
+    private double price;
 }

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class ReservationRequest.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,7 +18,13 @@ import lombok.ToString;
 @ToString
 public class ReservationRequest {
 
-	private int classId;
-	
-	private String studentNif;
+    /**
+     * The classId.
+     */
+    private int classId;
+    
+    /**
+     * The studentNif.
+     */
+    private String studentNif;
 }

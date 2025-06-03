@@ -16,6 +16,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class StudentEntity.
+ */
 @Entity
 @Table(name = "students")
 @NoArgsConstructor
@@ -25,24 +28,32 @@ import lombok.Setter;
 @Builder
 public class StudentEntity {
 	
+	/** The id */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
+	/** The name */
 	private String name; 
 	
+	/** The lastname */
 	private String lastname;
 	
+	/** The nif */
 	private String nif;
 	
+	/** The phone number */
 	@Column(name = "phone_number")
 	private String phoneNumber;
 	
+	/** The address */
 	private String address;
 	
+	/** The day of birth */
 	@Column(name = "date_of_birth")
 	private LocalDate dayOfBirth;
 	
+	/** The bonus */
 	@ManyToOne
 	@JoinColumn(name = "bond_id")
 	private BonusEntity bonus;

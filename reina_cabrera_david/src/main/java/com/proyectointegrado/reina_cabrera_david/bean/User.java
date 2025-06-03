@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class User.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -16,20 +19,44 @@ import lombok.ToString;
 @Builder
 @ToString
 public class User {
-	
-	private int id;
-	
-	private String name;
-	
-	private String lastname;
-	
-	private String corporateMail;
-	
-	private String phoneNumber;
-	
-	private String address;
-	
-	private LocalDate dayOfBirth;
-	
-	private Role role;
+
+    /**
+     * The id.
+     */
+    private int id;
+    
+    /**
+     * The name.
+     */
+    private String name;
+    
+    /**
+     * The lastname.
+     */
+    private String lastname;
+    
+    /**
+     * The corporateMail.
+     */
+    private String corporateMail;
+    
+    /**
+     * The phoneNumber.
+     */
+    private String phoneNumber;
+    
+    /**
+     * The address.
+     */
+    private String address;
+    
+    /**
+     * The dayOfBirth.
+     */
+    private LocalDate dayOfBirth;
+    
+    /**
+     * The role.
+     */
+    private Role role;
 }

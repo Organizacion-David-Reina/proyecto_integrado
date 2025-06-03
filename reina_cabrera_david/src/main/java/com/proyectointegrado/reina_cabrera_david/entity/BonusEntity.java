@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class BonusEntity.
+ */
 @Entity
 @Table(name = "bonuses")
 @NoArgsConstructor
@@ -21,13 +24,22 @@ import lombok.Setter;
 @Builder
 public class BonusEntity {
 
-	@Id
-	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
-	@Column(name = "bond_type")
-	private String bondType;
-	
-	private double price;
+    /**
+     * The id.
+     */
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    
+    /**
+     * The bondType.
+     */
+    @Column(name = "bond_type")
+    private String bondType;
+    
+    /**
+     * The price.
+     */
+    private double price;
 }

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class Style.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -14,8 +17,14 @@ import lombok.ToString;
 @Builder
 @ToString
 public class Style {
-	
-	private int id;
-	
-	private String style;
+    
+    /**
+     * The id.
+     */
+    private int id;
+    
+    /**
+     * The style.
+     */
+    private String style;
 }

@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class Credentials.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -13,9 +16,18 @@ import lombok.Setter;
 @Builder
 public class Credentials {
 
-	private String nif;
-	
-	private String corporateMail;
-	
-	private String password;
+    /**
+     * The nif.
+     */
+    private String nif;
+    
+    /**
+     * The corporateMail.
+     */
+    private String corporateMail;
+    
+    /**
+     * The password.
+     */
+    private String password;
 }

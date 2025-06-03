@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class UserRequest.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,7 +18,13 @@ import lombok.ToString;
 @ToString
 public class UserRequest {
 
-	private User user;
-	
-	private Credentials credentials;
+    /**
+     * The user.
+     */
+    private User user;
+    
+    /**
+     * The credentials.
+     */
+    private Credentials credentials;
 }

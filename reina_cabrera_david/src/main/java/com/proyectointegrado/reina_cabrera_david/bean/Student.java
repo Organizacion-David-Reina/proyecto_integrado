@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class Student.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -17,19 +20,43 @@ import lombok.ToString;
 @ToString
 public class Student {
 
-	private int id;
-	
-	private String name; 
-	
-	private String lastname;
-	
-	private String nif;
-	
-	private Bonus bonus;
-	
-	private String phoneNumber;
+    /**
+     * The id.
+     */
+    private int id;
+    
+    /**
+     * The name.
+     */
+    private String name;
+    
+    /**
+     * The lastname.
+     */
+    private String lastname;
+    
+    /**
+     * The nif.
+     */
+    private String nif;
+    
+    /**
+     * The bonus.
+     */
+    private Bonus bonus;
+    
+    /**
+     * The phoneNumber.
+     */
+    private String phoneNumber;
 
-	private String address;
+    /**
+     * The address.
+     */
+    private String address;
 
-	private LocalDate dayOfBirth;
+    /**
+     * The dayOfBirth.
+     */
+    private LocalDate dayOfBirth;
 }

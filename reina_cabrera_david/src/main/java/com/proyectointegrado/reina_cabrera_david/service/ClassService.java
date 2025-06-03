@@ -30,20 +30,37 @@ import com.proyectointegrado.reina_cabrera_david.repository.StyleRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * The Class ClassService
+ */
 @Service
 @Slf4j
 public class ClassService {
 
+	/** The Class Repository */
 	private ClassRepository classRepository;
 
+	/** The Reservation Repository */
 	private ReservationRepository reservationRepository;
 
+	/** The Style Repository */
 	private StyleRepository styleRepository;
 
+	/** The Room Repository */
 	private RoomRepository roomRepository;
 
+	/** The Students Repository */
 	private StudentsRepository studentsRepository;
 
+	/**
+	 * Constructor for ClassService with required repositories.
+	 *
+	 * @param classRepository       repository for dance classes
+	 * @param reservationRepository repository for reservations
+	 * @param styleRepository       repository for dance styles
+	 * @param roomRepository        repository for rooms
+	 * @param studentsRepository    repository for students
+	 */
 	protected ClassService(ClassRepository classRepository, ReservationRepository reservationRepository,
 			StyleRepository styleRepository, RoomRepository roomRepository, StudentsRepository studentsRepository) {
 		this.classRepository = classRepository;
@@ -53,6 +70,13 @@ public class ClassService {
 		this.studentsRepository = studentsRepository;
 	}
 
+	/**
+	 * Saves a new dance class after validating that the room and teacher are
+	 * available for the specified time and day.
+	 *
+	 * @param request the dance class data to save
+	 * @throws InternalServerException if the room or teacher is not available
+	 */
 	public void saveClass(DanceClass request) {
 		log.info("saveClass - request: {}", request.toString());
 		try {
@@ -79,6 +103,12 @@ public class ClassService {
 		}
 	}
 
+	/**
+	 * Retrieves all dance classes including related reservation count, style,
+	 * teacher, and room information.
+	 *
+	 * @return list of dance classes
+	 */
 	public List<DanceClass> getClasses() {
 		List<ClassEntity> classes = classRepository.findAllWithRelations();
 
@@ -91,6 +121,11 @@ public class ClassService {
 		}).collect(Collectors.toList());
 	}
 
+	/**
+	 * Retrieves all available dance styles.
+	 *
+	 * @return list of styles
+	 */
 	public List<Style> getStyles() {
 		List<StyleEntity> styles = styleRepository.findAll();
 
@@ -99,6 +134,11 @@ public class ClassService {
 		}).collect(Collectors.toList());
 	}
 
+	/**
+	 * Retrieves all available rooms.
+	 *
+	 * @return list of rooms
+	 */
 	public List<Room> getRooms() {
 		List<RoomEntity> rooms = roomRepository.findAll();
 
@@ -107,6 +147,14 @@ public class ClassService {
 		}).collect(Collectors.toList());
 	}
 
+	/**
+	 * Updates an existing dance class after validating room and teacher availability
+	 * excluding the current class.
+	 *
+	 * @param request the dance class data to update
+	 * @throws InternalServerException if the room or teacher is not available or
+	 *                                 class not found
+	 */
 	@Modifying(clearAutomatically = true)
 	@Transactional
 	public void updateClass(DanceClass request) {
@@ -131,7 +179,6 @@ public class ClassService {
 			Optional<ClassEntity> optionalExistingClass = classRepository.findById(request.getId());
 
 			if (optionalExistingClass.isPresent()) {
-
 				ClassEntity existingClass = optionalExistingClass.get();
 
 				existingClass.setStyle(StyleEntity.builder().id(request.getStyle().getId())
@@ -161,6 +208,15 @@ public class ClassService {
 		}
 	}
 
+	/**
+	 * Saves a new reservation for a student in a class if capacity and scheduling
+	 * constraints allow.
+	 *
+	 * @param request reservation request containing student NIF and class ID
+	 * @throws InternalServerException if student does not exist, class is full,
+	 *                                 student already reserved or has conflicting
+	 *                                 schedule
+	 */
 	public void saveReservation(ReservationRequest request) {
 		log.info("saveReservation - request: {} ", request.toString());
 		try {
@@ -212,6 +268,12 @@ public class ClassService {
 		}
 	}
 
+	/**
+	 * Deletes a dance class and all related reservations.
+	 *
+	 * @param classId the ID of the class to delete
+	 * @throws InternalServerException if the class does not exist
+	 */
 	@Transactional
 	public void deleteClass(int classId) {
 		log.info("deleteClass - classId: {} ", classId);
@@ -231,6 +293,13 @@ public class ClassService {
 		}
 	}
 
+	/**
+	 * Deletes a reservation for a student in a specific class.
+	 *
+	 * @param studentId the ID of the student
+	 * @param classId   the ID of the class
+	 * @throws InternalServerException if either the class or student does not exist
+	 */
 	@Transactional
 	public void deleteReservation(int studentId, int classId) {
 		log.info("deleteClass - classId: {} ", classId);
@@ -249,19 +318,43 @@ public class ClassService {
 		}
 	}
 
+	/**
+	 * Maps a RoomEntity to a Room bean.
+	 *
+	 * @param r the RoomEntity
+	 * @return the mapped Room
+	 */
 	private Room mapToRoom(RoomEntity r) {
 		return Room.builder().id(r.getId()).roomName(r.getRoomName()).capacity(r.getCapacity()).build();
 	}
 
+	/**
+	 * Maps a TeacherEntity to a Teacher bean.
+	 *
+	 * @param s the TeacherEntity
+	 * @return the mapped Teacher
+	 */
 	private Teacher mapToTeacher(TeacherEntity s) {
 		return Teacher.builder().id(s.getId()).name(s.getName()).lastname(s.getLastname()).mail(s.getMail())
 				.nif(s.getNif()).build();
 	}
 
+	/**
+	 * Maps a StyleEntity to a Style bean.
+	 *
+	 * @param c the StyleEntity
+	 * @return the mapped Style
+	 */
 	private Style mapToStyle(StyleEntity c) {
 		return Style.builder().id(c.getId()).style(c.getStyle()).build();
 	}
 
+	/**
+	 * Maps a DanceClass bean to a ClassEntity for persistence.
+	 *
+	 * @param request the DanceClass bean
+	 * @return the mapped ClassEntity
+	 */
 	private ClassEntity MapToClassEntity(DanceClass request) {
 		return ClassEntity.builder().id(request.getId() != -1 ? request.getId() : null)
 				.style(StyleEntity.builder().id(request.getStyle().getId()).style(request.getStyle().getStyle())
@@ -275,6 +368,15 @@ public class ClassService {
 				.endTime(LocalTime.parse(request.getEndTime())).build();
 	}
 	
+	/**
+	 * Checks if two time intervals overlap.
+	 *
+	 * @param start1 start time of the first interval
+	 * @param end1   end time of the first interval
+	 * @param start2 start time of the second interval
+	 * @param end2   end time of the second interval
+	 * @return true if the intervals overlap, false otherwise
+	 */
 	private boolean timesOverlap(LocalTime start1, LocalTime end1, LocalTime start2, LocalTime end2) {
 	    return !start1.isAfter(end2) && !start2.isAfter(end1);
 	}

@@ -13,6 +13,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class ReservationEntity.
+ * Represents a reservation linking a student to a dance class.
+ */
 @Entity
 @Table(name = "reservations")
 @NoArgsConstructor
@@ -22,15 +26,24 @@ import lombok.Setter;
 @Builder
 public class ReservationEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
-	@ManyToOne
-	@JoinColumn(name = "class_id")
-	private ClassEntity classEntity;
-	
-	@ManyToOne
-	@JoinColumn(name = "student_id")
-	private StudentEntity studentEntity;
+    /**
+     * The id.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * The classEntity.
+     */
+    @ManyToOne
+    @JoinColumn(name = "class_id")
+    private ClassEntity classEntity;
+
+    /**
+     * The studentEntity.
+     */
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private StudentEntity studentEntity;
 }

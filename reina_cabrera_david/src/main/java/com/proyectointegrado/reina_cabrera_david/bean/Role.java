@@ -6,15 +6,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class Role.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
 public class Role {
-	
-	private int id;
+    
+    /**
+     * The id.
+     */
+    private int id;
 
-	private String rol;
-	
+    /**
+     * The rol.
+     */
+    private String rol;
 }

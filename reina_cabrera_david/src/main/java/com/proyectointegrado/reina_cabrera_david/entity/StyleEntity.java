@@ -11,6 +11,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * The Class StyleEntity.
+ * Represents the style entity mapped to the "styles" database table.
+ */
 @Entity
 @Table(name = "styles")
 @NoArgsConstructor
@@ -20,9 +24,15 @@ import lombok.Setter;
 @Builder
 public class StyleEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
-	
-	private String style;
+    /**
+     * The id.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    
+    /**
+     * The style.
+     */
+    private String style;
 }

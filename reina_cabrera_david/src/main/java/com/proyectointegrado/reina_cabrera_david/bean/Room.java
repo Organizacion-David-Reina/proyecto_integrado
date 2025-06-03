@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class Room.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,9 +18,18 @@ import lombok.ToString;
 @ToString
 public class Room {
 
-	private int id;
-	
-	private String roomName;
-	
-	private int capacity;
+    /**
+     * The id.
+     */
+    private int id;
+    
+    /**
+     * The roomName.
+     */
+    private String roomName;
+    
+    /**
+     * The capacity.
+     */
+    private int capacity;
 }
