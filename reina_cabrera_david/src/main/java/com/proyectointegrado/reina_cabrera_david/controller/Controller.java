@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proyectointegrado.reina_cabrera_david.bean.DanceClass;
 import com.proyectointegrado.reina_cabrera_david.bean.ReservationRequest;
+import com.proyectointegrado.reina_cabrera_david.bean.Room;
 import com.proyectointegrado.reina_cabrera_david.bean.Student;
+import com.proyectointegrado.reina_cabrera_david.bean.Style;
 import com.proyectointegrado.reina_cabrera_david.bean.Teacher;
 import com.proyectointegrado.reina_cabrera_david.bean.User;
 import com.proyectointegrado.reina_cabrera_david.bean.UserRequest;
@@ -28,8 +30,7 @@ import com.proyectointegrado.reina_cabrera_david.service.TeacherService;
 import com.proyectointegrado.reina_cabrera_david.service.UserService;
 
 /**
- * The Class Controller.
- * REST controller to handle user, student, teacher, and class related endpoints.
+ * The Class Controller
  */
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -38,40 +39,40 @@ public class Controller {
 
 	/** The User Service */
     private UserService userService;
-
+    
     /** The Student Service */
     private StudentService studentService;
-
-    /** The Teachers Service */
+    
+    /** The Teacher Service */
     private TeacherService teacherService;
-
+    
     /** The Class Service */
     private ClassService classService;
 
     /**
-     * Constructor for Controller.
-     *
-     * @param userService the user service
-     * @param studentService the student service
-     * @param teacherService the teacher service
-     * @param classService the class service
+     * Constructor injecting the required services.
+     * 
+     * @param userService User management service
+     * @param studentService Student management service
+     * @param teacherService Teacher management service
+     * @param classService Class and reservation management service
      */
     protected Controller(UserService userService, StudentService studentService, TeacherService teacherService,
-            ClassService classService) {
+                         ClassService classService) {
         this.userService = userService;
         this.studentService = studentService;
         this.teacherService = teacherService;
         this.classService = classService;
     }
 
-    // Users end points
+    // ---------- USERS ----------
 
     /**
-     * Logs in a user by corporate mail and password.
-     *
-     * @param corporateMail the corporate mail
-     * @param password the password
-     * @return the authenticated User object
+     * Logs in a user by verifying credentials.
+     * 
+     * @param corporateMail User's corporate email
+     * @param password User's password
+     * @return User object if credentials are valid
      */
     @GetMapping("login")
     public User login(@RequestParam String corporateMail, @RequestParam String password) {
@@ -79,10 +80,10 @@ public class Controller {
     }
 
     /**
-     * Signs up a new user.
-     *
-     * @param request the user request body containing sign up data
-     * @return ResponseEntity with HTTP CREATED status
+     * Registers a new user.
+     * 
+     * @param request User registration request object
+     * @return HTTP 201 Created if successful
      */
     @PostMapping("sign-up")
     public ResponseEntity<String> signUp(@RequestBody UserRequest request) {
@@ -91,9 +92,9 @@ public class Controller {
     }
 
     /**
-     * Gets a list of all users.
-     *
-     * @return list of User objects
+     * Retrieves all registered users.
+     * 
+     * @return List of all users
      */
     @GetMapping("users-list")
     public List<User> getAllUsers() {
@@ -101,10 +102,10 @@ public class Controller {
     }
 
     /**
-     * Updates an existing user.
-     *
-     * @param request the user data to update
-     * @return ResponseEntity with HTTP CREATED status
+     * Updates user information.
+     * 
+     * @param request Updated user object
+     * @return HTTP 201 Created if successful
      */
     @PutMapping("update-user")
     public ResponseEntity<String> updateUser(@RequestBody User request) {
@@ -114,21 +115,21 @@ public class Controller {
 
     /**
      * Deletes a user by ID.
-     *
-     * @param userId the ID of the user to delete
+     * 
+     * @param userId ID of the user to delete
      */
     @DeleteMapping("delete-user/{user_id}")
     public void deleteUser(@PathVariable("user_id") int userId) {
         userService.deleteUser(userId);
     }
 
-    // Students end points
+    // ---------- STUDENTS ----------
 
     /**
      * Saves a new student.
-     *
-     * @param request the student data to save
-     * @return ResponseEntity with HTTP CREATED status
+     * 
+     * @param request Student object to save
+     * @return HTTP 201 Created if successful
      */
     @PostMapping("save-student")
     public ResponseEntity<String> saveStudent(@RequestBody Student request) {
@@ -137,9 +138,9 @@ public class Controller {
     }
 
     /**
-     * Gets all students.
-     *
-     * @return list of Student objects
+     * Retrieves all students.
+     * 
+     * @return List of all students
      */
     @GetMapping("students-list")
     public List<Student> getAllStudents() {
@@ -147,10 +148,10 @@ public class Controller {
     }
 
     /**
-     * Updates an existing student.
-     *
-     * @param request the student data to update
-     * @return ResponseEntity with HTTP CREATED status
+     * Updates student information.
+     * 
+     * @param request Updated student object
+     * @return HTTP 201 Created if successful
      */
     @PutMapping("update-student")
     public ResponseEntity<String> updateStudent(@RequestBody Student request) {
@@ -159,10 +160,10 @@ public class Controller {
     }
 
     /**
-     * Gets students reserved for a specific class.
-     *
-     * @param classId the ID of the class
-     * @return list of Student objects reserved for the class
+     * Retrieves students enrolled in a specific class.
+     * 
+     * @param classId ID of the class
+     * @return List of students enrolled in the class
      */
     @GetMapping("students-reserved/{class_id}")
     public List<Student> getStudentsByClassId(@PathVariable("class_id") int classId) {
@@ -171,21 +172,21 @@ public class Controller {
 
     /**
      * Deletes a student by ID.
-     *
-     * @param studentId the ID of the student to delete
+     * 
+     * @param studentId ID of the student to delete
      */
     @DeleteMapping("delete-student/{student_id}")
     public void deleteStudent(@PathVariable("student_id") int studentId) {
         studentService.deleteStudent(studentId);
     }
 
-    // Teachers end points
+    // ---------- TEACHERS ----------
 
     /**
      * Saves a new teacher.
-     *
-     * @param request the teacher data to save
-     * @return ResponseEntity with HTTP CREATED status
+     * 
+     * @param request Teacher object to save
+     * @return HTTP 201 Created if successful
      */
     @PostMapping("save-teacher")
     public ResponseEntity<String> saveTeacher(@RequestBody Teacher request) {
@@ -194,9 +195,9 @@ public class Controller {
     }
 
     /**
-     * Gets all teachers.
-     *
-     * @return list of Teacher objects
+     * Retrieves all teachers.
+     * 
+     * @return List of all teachers
      */
     @GetMapping("teachers-list")
     public List<Teacher> getAllTeachers() {
@@ -204,10 +205,10 @@ public class Controller {
     }
 
     /**
-     * Updates an existing teacher.
-     *
-     * @param request the teacher data to update
-     * @return ResponseEntity with HTTP CREATED status
+     * Updates teacher information.
+     * 
+     * @param request Updated teacher object
+     * @return HTTP 201 Created if successful
      */
     @PutMapping("update-teacher")
     public ResponseEntity<String> updateTeacher(@RequestBody Teacher request) {
@@ -217,21 +218,21 @@ public class Controller {
 
     /**
      * Deletes a teacher by ID.
-     *
-     * @param teacherId the ID of the teacher to delete
+     * 
+     * @param teacherId ID of the teacher to delete
      */
     @DeleteMapping("delete-teacher/{teacher_id}")
     public void deleteTeacher(@PathVariable("teacher_id") int teacherId) {
         teacherService.deleteTeacher(teacherId);
     }
 
-    // Classes end points
+    // ---------- CLASSES ----------
 
     /**
      * Saves a new dance class.
-     *
-     * @param request the dance class data to save
-     * @return ResponseEntity with HTTP CREATED status
+     * 
+     * @param request Dance class object to save
+     * @return HTTP 201 Created if successful
      */
     @PostMapping("save-class")
     public ResponseEntity<String> saveClass(@RequestBody DanceClass request) {
@@ -240,10 +241,10 @@ public class Controller {
     }
 
     /**
-     * Saves a new reservation for a class.
-     *
-     * @param request the reservation request data
-     * @return ResponseEntity with HTTP CREATED status
+     * Saves a reservation for a student in a class.
+     * 
+     * @param request Reservation request object
+     * @return HTTP 201 Created if successful
      */
     @PostMapping("save-reservation")
     public ResponseEntity<String> saveReservation(@RequestBody ReservationRequest request) {
@@ -252,10 +253,10 @@ public class Controller {
     }
 
     /**
-     * Updates an existing dance class.
-     *
-     * @param request the dance class data to update
-     * @return ResponseEntity with HTTP CREATED status
+     * Updates a dance class.
+     * 
+     * @param request Updated dance class object
+     * @return HTTP 201 Created if successful
      */
     @PutMapping("update-class")
     public ResponseEntity<String> updateClass(@RequestBody DanceClass request) {
@@ -265,8 +266,8 @@ public class Controller {
 
     /**
      * Deletes a dance class by ID.
-     *
-     * @param classId the ID of the class to delete
+     * 
+     * @param classId ID of the class to delete
      */
     @DeleteMapping("delete-class/{class_id}")
     public void deleteClass(@PathVariable("class_id") int classId) {
@@ -274,10 +275,10 @@ public class Controller {
     }
 
     /**
-     * Deletes a reservation for a student and class.
-     *
-     * @param studentId the student ID
-     * @param classId the class ID
+     * Deletes a reservation linking a student to a class.
+     * 
+     * @param studentId ID of the student
+     * @param classId ID of the class
      */
     @DeleteMapping("delete-reservation/{student_id}/{class_id}")
     public void deleteReservation(@PathVariable("student_id") int studentId, @PathVariable("class_id") int classId) {
@@ -285,13 +286,32 @@ public class Controller {
     }
 
     /**
-     * Gets the list of all dance classes.
-     *
-     * @return list of DanceClass objects
+     * Retrieves all dance classes.
+     * 
+     * @return List of all dance classes
      */
     @GetMapping("classes-list")
     public List<DanceClass> getClasses() {
         return classService.getClasses();
     }
 
+    /**
+     * Retrieves all available dance styles.
+     * 
+     * @return List of all styles
+     */
+    @GetMapping("styles-list")
+    public List<Style> getStyles() {
+        return classService.getStyles();
+    }
+
+    /**
+     * Retrieves all available rooms.
+     * 
+     * @return List of all rooms
+     */
+    @GetMapping("rooms-list")
+    public List<Room> getRooms() {
+        return classService.getRooms();
+    }
 }
