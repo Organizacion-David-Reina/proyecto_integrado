@@ -59,4 +59,7 @@ public class Student {
      * The dayOfBirth.
      */
     private LocalDate dayOfBirth;
+    
+	/**The mail */
+	private String mail;
 }

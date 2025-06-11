@@ -73,12 +73,12 @@ public class StudentService {
 	 * @return list of students
 	 */
 	public List<Student> getAllStudents() {
-		List<Student> students = studentsRepository
-				.findAll().stream().map(s -> Student.builder().id(s.getId()).name(s.getName()).lastname(s.getLastname())
-						.nif(s.getNif()).address(s.getAddress()).phoneNumber(s.getPhoneNumber())
-						.dayOfBirth(s.getDayOfBirth()).bonus(Bonus.builder().id(s.getBonus().getId())
-								.bondType(s.getBonus().getBondType()).price(s.getBonus().getPrice()).build())
-						.build())
+		List<Student> students = studentsRepository.findAll().stream()
+				.map(s -> Student.builder().id(s.getId()).name(s.getName()).lastname(s.getLastname()).nif(s.getNif())
+						.address(s.getAddress()).phoneNumber(s.getPhoneNumber()).dayOfBirth(s.getDayOfBirth())
+						.bonus(Bonus.builder().id(s.getBonus().getId()).bondType(s.getBonus().getBondType())
+								.price(s.getBonus().getPrice()).build())
+						.mail(s.getMail()).build())
 				.collect(Collectors.toList());
 		return students;
 	}
@@ -160,7 +160,8 @@ public class StudentService {
 	private StudentEntity mapToStudentEntity(Student request, BonusEntity bonusEntity) {
 		return StudentEntity.builder().id(request.getId() != -1 ? request.getId() : null).name(request.getName())
 				.lastname(request.getLastname()).nif(request.getNif()).address(request.getAddress())
-				.phoneNumber(request.getPhoneNumber()).dayOfBirth(request.getDayOfBirth()).bonus(bonusEntity).build();
+				.phoneNumber(request.getPhoneNumber()).dayOfBirth(request.getDayOfBirth()).bonus(bonusEntity)
+				.mail(request.getMail()).build();
 	}
 
 	/**

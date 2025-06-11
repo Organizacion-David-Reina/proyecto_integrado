@@ -57,4 +57,7 @@ public class StudentEntity {
 	@ManyToOne
 	@JoinColumn(name = "bond_id")
 	private BonusEntity bonus;
+	
+	/**The mail */
+	private String mail;
 }

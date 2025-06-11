@@ -13,6 +13,7 @@ import com.proyectointegrado.reina_cabrera_david.bean.ReservationRequest;
 import com.proyectointegrado.reina_cabrera_david.bean.Room;
 import com.proyectointegrado.reina_cabrera_david.bean.Style;
 import com.proyectointegrado.reina_cabrera_david.bean.Teacher;
+import com.proyectointegrado.reina_cabrera_david.constants.Constants;
 import com.proyectointegrado.reina_cabrera_david.constants.ErrorConstants;
 import com.proyectointegrado.reina_cabrera_david.entity.ClassEntity;
 import com.proyectointegrado.reina_cabrera_david.entity.ReservationEntity;
@@ -51,6 +52,9 @@ public class ClassService {
 
 	/** The Students Repository */
 	private StudentsRepository studentsRepository;
+	
+	/** The Email Service */
+	private EmailService emailService;
 
 	/**
 	 * Constructor for ClassService with required repositories.
@@ -60,14 +64,17 @@ public class ClassService {
 	 * @param styleRepository       repository for dance styles
 	 * @param roomRepository        repository for rooms
 	 * @param studentsRepository    repository for students
+	 * @param emailService 			Service to send emails
 	 */
 	protected ClassService(ClassRepository classRepository, ReservationRepository reservationRepository,
-			StyleRepository styleRepository, RoomRepository roomRepository, StudentsRepository studentsRepository) {
+			StyleRepository styleRepository, RoomRepository roomRepository, StudentsRepository studentsRepository,
+			EmailService emailService) {
 		this.classRepository = classRepository;
 		this.reservationRepository = reservationRepository;
 		this.styleRepository = styleRepository;
 		this.roomRepository = roomRepository;
 		this.studentsRepository = studentsRepository;
+		this.emailService = emailService;
 	}
 
 	/**
@@ -102,6 +109,7 @@ public class ClassService {
 			throw new InternalServerException(e.getMessage(), e);
 		}
 	}
+
 
 	/**
 	 * Retrieves all dance classes including related reservation count, style,
@@ -258,7 +266,18 @@ public class ClassService {
 						.studentEntity(studentEntity).build();
 
 				reservationRepository.save(reservationEntity);
-
+				String studentName = studentEntity.getName();
+				String classStyle = classEntity.getStyle().getStyle();
+				String classDay = String.valueOf(classEntity.getDay());
+				String classStartTime = String.valueOf(classEntity.getStartTime());
+				String personalizedHtml = String.format(
+					    Constants.RESERVATION_SAVED_HTML_MAIL_TEMPLATE,
+					    studentName,
+					    classStyle,
+					    classDay,
+					    classStartTime
+					);
+				emailService.sendEmail(studentEntity.getMail(), "RESERVA DE CLASE", personalizedHtml);
 			} else {
 				throw new InternalServerException(ErrorConstants.STUDENT_NOT_EXISTS);
 			}
@@ -276,22 +295,48 @@ public class ClassService {
 	 */
 	@Transactional
 	public void deleteClass(int classId) {
-		log.info("deleteClass - classId: {} ", classId);
-		try {
-			Optional<ClassEntity> optionalClass = classRepository.findById(classId);
+	    log.info("deleteClass - classId: {} ", classId);
+	    try {
+	        Optional<ClassEntity> optionalClass = classRepository.findById(classId);
 
-			if (optionalClass.isPresent()) {
-				ClassEntity classEntity = optionalClass.get();
-				reservationRepository.deleteByClassEntityId(classEntity.getId());
-				classRepository.delete(classEntity);
-			} else {
-				throw new InternalServerException(ErrorConstants.CLASS_NOT_EXISTS);
-			}
-		} catch (Exception e) {
-			log.error("deleteClass - error - {}", e.getMessage());
-			throw new InternalServerException(e.getMessage(), e);
-		}
+	        if (optionalClass.isPresent()) {
+	            ClassEntity classEntity = optionalClass.get();
+	            List<StudentEntity> studentsReserved = reservationRepository.findStudentsByClassId(classId);
+
+	            for (StudentEntity student : studentsReserved) {
+	                String email = student.getMail();
+	                String studentName = student.getName();
+	                String classStyle = classEntity.getStyle().getStyle();
+	                String classDay = classEntity.getDay().toString();
+	                String startTime = classEntity.getStartTime().toString();
+
+	                String emailContent = String.format(
+	                    Constants.CLASS_CANCELLED_HTML_MAIL_TEMPLATE,
+	                    studentName,
+	                    classStyle,
+	                    classDay,
+	                    startTime
+	                );
+
+	                emailService.sendEmail(
+	                    email,
+	                    "CANCELACIÓN DE RESERVA",
+	                    emailContent
+	                );
+	            }
+
+	            reservationRepository.deleteByClassEntityId(classEntity.getId());
+	            classRepository.delete(classEntity);
+
+	        } else {
+	            throw new InternalServerException(ErrorConstants.CLASS_NOT_EXISTS);
+	        }
+	    } catch (Exception e) {
+	        log.error("deleteClass - error - {}", e.getMessage());
+	        throw new InternalServerException(e.getMessage(), e);
+	    }
 	}
+
 
 	/**
 	 * Deletes a reservation for a student in a specific class.
@@ -308,7 +353,21 @@ public class ClassService {
 			Optional<StudentEntity> optionalStudent = studentsRepository.findById(studentId);
 
 			if (optionalClass.isPresent() && optionalStudent.isPresent()) {
+				StudentEntity studentEntity = optionalStudent.get();
+				ClassEntity classEntity = optionalClass.get();
 				reservationRepository.deleteByClassEntityIdAndStudentEntityId(classId, studentId);
+				String studentName = studentEntity.getName();
+				String classStyle = classEntity.getStyle().getStyle();
+				String classDay = String.valueOf(classEntity.getDay());
+				String classStartTime = String.valueOf(classEntity.getStartTime());
+				String personalizedHtml = String.format(
+					    Constants.RESERVATION_CANCELLED_HTML_MAIL_TEMPLATE,
+					    studentName,
+					    classStyle,
+					    classDay,
+					    classStartTime
+					);
+				emailService.sendEmail(studentEntity.getMail(), "RESERVA DE CLASE", personalizedHtml);
 			} else {
 				throw new InternalServerException(ErrorConstants.CLASS_AND_STUDENT_NOT_EXIST);
 			}

@@ -3,8 +3,11 @@ package com.proyectointegrado.reina_cabrera_david.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.proyectointegrado.reina_cabrera_david.entity.ReservationEntity;
+import com.proyectointegrado.reina_cabrera_david.entity.StudentEntity;
 
 /**
  * The Interface ReservationRepository.
@@ -58,4 +61,13 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 	 * @return list of ReservationEntity objects
 	 */
 	List<ReservationEntity> findByStudentEntityId(int studentId);
+	
+	/**
+	 * Finds all students that have a reservation in a given class.
+	 *
+	 * @param classId the class ID
+	 * @return list of students with reservations in that class
+	 */
+	@Query("SELECT r.studentEntity FROM ReservationEntity r WHERE r.classEntity.id = :classId")
+	List<StudentEntity> findStudentsByClassId(@Param("classId") int classId);
 }
